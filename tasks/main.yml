@@ -23,8 +23,6 @@
       - "80:80"
       - "443:443"
 
-      - name: ensure docker network existing
-
 - name: ensure letsencrypt-nginx-proxy-companion is running
   docker_container:
     name: nginx-proxy-letsencrypt
