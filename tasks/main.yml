@@ -1,0 +1,39 @@
+- name: ensure docker volumes for nginx proxy existing
+  docker_volume:
+    name: "{{ item }}"
+  with_items:
+    - nginx-proxy-certs
+    - nginx-proxy-vhost_d
+    - nginx-proxy-html
+    - nginx-proxy-dhparam
+
+- name: ensure nginx-proxy is running
+  docker_container:
+    name: nginx-proxy
+    image: jwilder/nginx-proxy:alpine
+    state: started
+    restart_policy: on-failure
+    volumes:
+      - nginx-proxy-certs:/etc/nginx/certs
+      - nginx-proxy-vhost_d:/etc/nginx/vhost.d
+      - nginx-proxy-html:/usr/share/nginx/html
+      - nginx-proxy-dhparam:/etc/nginx/dhparam/
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+      - "80:80"
+      - "443:443"
+
+      - name: ensure docker network existing
+
+- name: ensure letsencrypt-nginx-proxy-companion is running
+  docker_container:
+    name: nginx-proxy-letsencrypt
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    state: started
+    restart_policy: on-failure
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes_from:
+      - nginx-proxy
+    env:
+      DEFAULT_EMAIL: "{{ letsencypt_email }}"
